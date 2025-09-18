@@ -1,53 +1,80 @@
 {% set name = "jupysql" %}
 {% set version = "0.11.1" %}
-{% set python_min = python_min|default("3.9") %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/jupysql-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 88f2461b11abaa963c0fcb68b2bc30382dd5c10f33cdc4feee0a7ac49accb0c3
 
 build:
-  script: {{ PYTHON }} -m pip install . -vv
-  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
 
 requirements:
   host:
     - pip
-    - python {{ python_min }}.*
+    - python
     - setuptools
   run:
-    - python >={{ python_min }}
+    - python
     - prettytable >=3.12.0
-    - ipython
+    - ipython <=8.12.0  # [py<=38]
     - sqlalchemy
     - sqlparse
     - ipython_genutils >=0.1.0
     - jinja2
     - sqlglot >=11.3.7
+    - importlib-metadata  # [py<38]
     - jupysql-plugin >=0.4.2
     - ploomber-core >=0.2.7
-    - psutil
 
 test:
   imports:
     - sql
-  commands:
-    - pip check
+    - sql._current
+    - sql._patch
+    - sql._testing
+    - sql.cmd
+    - sql.column_guesser
+    - sql.command
+    - sql.connection
+    - sql.display
+    - sql.error_handler
+    - sql.exceptions
+    - sql.ggplot
+    - sql.inspect
+    - sql.magic
+    - sql.parse
+    - sql.run
+    - sql.stats
+    - sql.store
+    - sql.traits
+    - sql.util
+    - sql.warnings
+    - sql.widgets
   requires:
     - pip
-    - python ={{ python_min }}
+    - ipython
+    - matplotlib
+  commands:
+    - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+    # Cannot run upstream tests due to lack of dockerctx/runsql packages
 
 about:
   home: https://github.com/ploomber/jupysql
-  summary: Better SQL in Jupyter
-  dev_url: https://github.com/ploomber/jupysql
+  summary: JupySQL allows you to run SQL and plot large datasets in Jupyter
+  description: JupySQL allows you to run SQL and plot large datasets in Jupyter via a %sql, %%sql, and %sqlplot magics.
+    JupySQL is compatible with all major databases (e.g., PostgreSQL, MySQL, SQL Server),
+    data warehouses (e.g., Snowflake, BigQuery, Redshift), and embedded engines (SQLite, and DuckDB).
   license: Apache-2.0
+  license_family: APACHE
   license_file: LICENSE
+  dev_url: https://github.com/ploomber/jupysql
+  doc_url: https://jupysql.ploomber.io
 
 extra:
   recipe-maintainers:

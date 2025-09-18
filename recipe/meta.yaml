@@ -58,7 +58,7 @@ test:
   requires:
     - pip
     - ipython
-    - matplotlib
+    - matplotlib-base >=3.7.2
   commands:
     - pip check
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
